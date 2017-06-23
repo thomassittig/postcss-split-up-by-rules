@@ -31,27 +31,27 @@ let handleForContext = (selector, originRule, root) =>{
         root.insertAfter(originRule, themedRule);
         skipNext = true;
 
-        console.log('duplicated: ', themedRule.selector, ' => ', originRule.selector)
+        console.log('duplicated: ', themedRule.selector, ' => ', originRule.selector);
     }
 
     return skipNext;
-}
+};
 
-module.exports = postcss.plugin('postcss-split-up-by-rules', function (opts){
-    opts = Object.assign({}, {listenFor: [], extract: []}, opts || {});
+module.exports = postcss.plugin('postcss-split-up-by-rules', function (opts) {
+    opts = Object.assign({}, { listenFor: [], extract: [] }, opts || {});
     // Work with options here
 
-    return function (root, result){
+    return function (root) {
         // Transform CSS AST here
         opts.listenFor.forEach((selector) =>{
             let skipNext = false;
-            root.walkRules(function (originRule){
+            root.walkRules(function (originRule) {
                 if (skipNext) {
                     skipNext = false;
                 } else {
-                    skipNext = handleForContext(selector, originRule, root)
+                    skipNext = handleForContext(selector, originRule, root);
                 }
-            })
-        })
-    }
+            });
+        });
+    };
 });
