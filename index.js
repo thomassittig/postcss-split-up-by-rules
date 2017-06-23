@@ -3,55 +3,57 @@ var postcss = require('postcss');
  * Split a single rule definition into two
  *
  */
+const extractDeclarations = (rule, names) =>{
+  let extractedDecls = [];
+  names.forEach((declName) =>{
+    rule.walkDecls(declName, (decl) =>{
+      extractedDecls.push(decl);
+      decl.remove();
+    });
+  });
 
-let handleForContext = (selector, originRule, root) =>{
-    let regexSelector = new RegExp(`(${selector}\\s{1})`, 'g'),
-        skipNext = false;
+  return extractedDecls;
 
-    if (originRule.selector.indexOf(selector) === 0) {
-        let themedRule = originRule.clone(), dcls = [];
-        themedRule.removeAll();
+}
+const handleForContext = (selector, opts, postcssOpts) =>{
+  let regexSelector = new RegExp(`(${selector}\\s{1})`, 'g'),
+    skipNext = false;
 
-        originRule.walkDecls('color', (decl) =>{
-            dcls.push(decl);
-            decl.remove();
-        });
+  if (postcssOpts.originRule.selector.indexOf(selector) === 0) {
+    let themedRule = postcssOpts.originRule.clone(),
+      dcls;
+    themedRule.removeAll();
 
-        originRule.walkDecls('background-color', (decl) =>{
-            dcls.push(decl);
-            decl.remove();
-        });
+    dcls = extractDeclarations(postcssOpts.originRule, opts.extract);
 
-        originRule.selector = originRule.selector.replace(regexSelector, '');
+    postcssOpts.originRule.selector = postcssOpts.originRule.selector.replace(regexSelector, '');
 
-        dcls.map((dcl) =>{
-            themedRule.append(dcl);
-        });
+    dcls.map((dcl) =>{
+      themedRule.append(dcl);
+    });
 
-        root.insertAfter(originRule, themedRule);
-        skipNext = true;
+    postcssOpts.root.insertAfter(postcssOpts.originRule, themedRule);
+    skipNext = true;
+  }
 
-        console.log('duplicated: ', themedRule.selector, ' => ', originRule.selector);
-    }
-
-    return skipNext;
+  return skipNext;
 };
 
-module.exports = postcss.plugin('postcss-split-up-by-rules', function (opts) {
-    opts = Object.assign({}, { listenFor: [], extract: [] }, opts || {});
-    // Work with options here
+module.exports = postcss.plugin('postcss-split-up-by-rules', function (opts){
+  opts = Object.assign({}, {listenFor: [], extract: []}, opts || {});
+  // Work with options here
 
-    return function (root) {
-        // Transform CSS AST here
-        opts.listenFor.forEach((selector) =>{
-            let skipNext = false;
-            root.walkRules(function (originRule) {
-                if (skipNext) {
-                    skipNext = false;
-                } else {
-                    skipNext = handleForContext(selector, originRule, root);
-                }
-            });
-        });
-    };
+  return function (root){
+    // Transform CSS AST here
+    opts.listenFor.forEach((selector) =>{
+      let skipNext = false;
+      root.walkRules(function (originRule){
+        if (skipNext) {
+          skipNext = false;
+        } else {
+          skipNext = handleForContext(selector, opts, {originRule, root});
+        }
+      });
+    });
+  };
 });

@@ -1,51 +1,38 @@
-# PostCSS Plugin Boilerplate
+# PostCSS Plugin postcss-split-up-by-rules
 
-<img align="right" width="135" height="95"
-     title="Philosopher’s stone, logo of PostCSS"
-     src="http://postcss.github.io/postcss/logo-leftp.svg">
+## Example usage and result
 
-Сreate new PostCSS plugins in a few steps:
+Add the plugin and configuration to your postcss.config.js:
 
-1. Clone this repository:
-
-```sh
-git clone https://github.com/postcss/postcss-plugin-boilerplate.git
+```JavaScript
+    module.exports = {
+      plugins: {
+        'postcss-split-up-by-rules': { 
+            listenFor: ['.themed .selector'], 
+            extract: ['color', 'background-color'] 
+         },
+      },
+    };
 ```
 
-2. Execute the wizard script. It will ask you a few questions
-   and fill all files with your data.
+So now, if you have a css like
 
-```sh
-node ./postcss-plugin-boilerplate/start
+```CSS
+.themed .selector .for .any .element {
+    margin: 0;
+    color: #ffffff;
+}
 ```
 
-Call it with `--yarn` argument, if you prefer [yarn](https://yarnpkg.com/)
-package manager:
+You will get:
 
-```sh
-node ./postcss-plugin-boilerplate/start --yarn
+
+```CSS
+.for .any .element {
+    margin: 0;
+}
+
+.themed .selector .for .any .element {
+    color: #ffffff;
+}
 ```
-
-Or use `--no-install` if you want to skip dependencies installation.
-
-3. Your plugin repository will now have a clean Git history.
-[Create the GitHub repository](https://github.com/new)
-and push your project there.
-
-4. Add your project to [Travis CI](https://travis-ci.org).
-
-5. Write some code to `index.js` and tests to `test.js`.
-
-6. Execute `npm test` command
-
-7. Add input and output CSS examples to `README.md`.
-
-8. Add options descriptions if your plugin has them.
-
-9. Fill `CHANGELOG.md` with initial version and release it to npm.
-
-10. Fork [PostCSS](https://github.com/postcss/postcss), add your plugin to the
-[Plugins list](https://github.com/postcss/postcss/blob/master/docs/plugins.md)
-and send a pull request.
-
-11. Follow [@PostCSS](https://twitter.com/postcss) to get the latest updates.
