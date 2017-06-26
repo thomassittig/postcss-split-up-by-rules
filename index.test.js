@@ -24,5 +24,20 @@ it( 'does split the rules', () => {
             '.element {margin: 0;color: #ffffff;}',
         expected = '.for .any .element {margin: 0;}' +
             '.themed .selector .for .any .element {color: #ffffff;}';
+
+    return run( given, expected, options );
+} );
+
+it( 'does moves the extracted rules to the end of the rules', () => {
+    let options = {
+            listenFor: [ '.themed .selector' ],
+            extract: [ 'color', 'background-color' ]
+        },
+        given = '.themed .selector .for .any ' +
+            '.element {margin: 0;color: #ffffff;}' +
+            '.separator-element {padding: 0;color: #ffffff;}',
+        expected = '.for .any .element {margin: 0;}' +
+            '.separator-element {padding: 0;color: #ffffff;}' +
+            '.themed .selector .for .any .element {color: #ffffff;}';
     return run( given, expected, options );
 } );

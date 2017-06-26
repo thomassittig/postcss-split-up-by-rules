@@ -15,51 +15,58 @@ const extractDeclarations = ( rule, names ) => {
     return extractedDecls;
 
 };
-const handleForContext = ( selector, opts, postcssOpts ) => {
+const handleForContext = ( selector, options, postcssOptions ) => {
     let regexSelector = new RegExp( `(${selector}\\s{1})`, 'g' ),
-        skipNext = false;
+        themedRule = null, declarations
+    ;
 
-    if (postcssOpts.originRule.selector.indexOf( selector ) === 0) {
-        let themedRule = postcssOpts.originRule.clone(),
-            dcls;
+    if (postcssOptions.originRule.selector.indexOf( selector ) === 0) {
+        themedRule = postcssOptions.originRule.clone();
         themedRule.removeAll();
 
-        dcls = extractDeclarations( postcssOpts.originRule, opts.extract );
+        declarations = extractDeclarations(
+            postcssOptions.originRule,
+            options.extract
+        );
 
-        postcssOpts.originRule.selector = postcssOpts
+        postcssOptions.originRule.selector = postcssOptions
             .originRule
             .selector
             .replace( regexSelector, '' );
 
-        dcls.map( ( dcl ) => {
-            themedRule.append( dcl );
+        declarations.map( ( declaration ) => {
+            themedRule.append( declaration );
         } );
-
-        postcssOpts.root.insertAfter( postcssOpts.originRule, themedRule );
-        skipNext = true;
     }
 
-    return skipNext;
+    return themedRule;
 };
 
-module.exports = postcss.plugin( 'postcss-split-up-by-rules', ( opts ) => {
-    opts = Object.assign( {}, { listenFor: [], extract: [] }, opts || {} );
-    // Work with options here
+module.exports = postcss.plugin( 'postcss-split-up-by-rules', ( options ) => {
+    options = Object.assign(
+        {},
+        { listenFor: [], extract: [] },
+        options || {}
+    );
+
+    const themedRules = [];
 
     return ( root ) => {
-        // Transform CSS AST here
-        opts.listenFor.forEach( ( selector ) => {
-            let skipNext = false;
+        options.listenFor.forEach( ( selector ) => {
             root.walkRules( ( originRule ) => {
-                if (skipNext) {
-                    skipNext = false;
-                } else {
-                    skipNext = handleForContext( selector, opts, {
-                        originRule,
-                        root
-                    } );
+                let themedRule = handleForContext( selector, options, {
+                    originRule,
+                    root
+                } );
+
+                if (themedRule) {
+                    themedRules.push( themedRule );
                 }
             } );
+        } );
+
+        themedRules.forEach( themedRule => {
+            root.append( themedRule );
         } );
     };
 } );
