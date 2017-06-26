@@ -1,21 +1,11 @@
-# PostCSS Plugin postcss-split-up-by-rules
+# postcss-split-up-by-rules [![Build Status][ci-img]][ci]
 
-## Example usage and result
+[PostCSS] plugin Split up and filter a ruleset.
 
-Add the plugin and configuration to your postcss.config.js:
+[PostCSS]: https://github.com/postcss/postcss
+[ci-img]:  https://travis-ci.org/thomassittig/postcss-split-up-by-rules.svg
+[ci]:      https://travis-ci.org/thomassittig/postcss-split-up-by-rules
 
-```JavaScript
-    module.exports = {
-      plugins: {
-        'postcss-split-up-by-rules': { 
-            listenFor: ['.themed .selector'], 
-            extract: ['color', 'background-color'] 
-         },
-      },
-    };
-```
-
-So now, if you have a css like
 
 ```CSS
 .themed .selector .for .any .element {
@@ -23,9 +13,6 @@ So now, if you have a css like
     color: #ffffff;
 }
 ```
-
-You will get:
-
 
 ```CSS
 .for .any .element {
@@ -36,3 +23,18 @@ You will get:
     color: #ffffff;
 }
 ```
+
+## Usage
+
+```js
+    module.exports = {
+      plugins: {
+        'postcss-split-up-by-rules': { 
+            listenFor: ['.themed .selector'], 
+            extract: ['color', 'background-color'] 
+         },
+      },
+    };
+```
+
+See [PostCSS] docs for examples for your environment.
